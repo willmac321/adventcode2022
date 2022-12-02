@@ -5,6 +5,12 @@ const day1 = async (req: Request, res: Response): Promise<Response> => {
     headers: { cookie: process.env.SESSION_COOKIE },
   });
 
+  if (result.status !== 200) {
+    return res.send({
+      input: ["uhoh"],
+    });
+  }
+
   const day1Input = result.data
     .split("\n\n")
     .map((elf: string) => elf.split("\n"));

@@ -17,11 +17,6 @@ const day1 = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield axios_1.default.get("https://adventofcode.com/2022/day/1/input", {
         headers: { cookie: process.env.SESSION_COOKIE },
     });
-    if (result.status !== 200) {
-        return res.send({
-            input: ["uhoh"],
-        });
-    }
     const day1Input = result.data
         .split("\n\n")
         .map((elf) => elf.split("\n"));

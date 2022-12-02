@@ -33,6 +33,15 @@ function App(): JSX.Element {
             day 1
           </Typography>
         </RouterLink>
+        <RouterLink to="/day2">
+          <Typography
+            variant="h4"
+            component="span"
+            sx={{ color: "secondary.main" }}
+          >
+            day 2
+          </Typography>
+        </RouterLink>
       </Stack>
     </Paper>
   );
