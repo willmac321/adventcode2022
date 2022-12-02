@@ -6,7 +6,9 @@ type errorType = {
 } | null;
 
 type resultType = {
-  input: string[][];
+  input: string[];
+  output1: string;
+  output2: string;
 } | null;
 
 function Day2(): JSX.Element {
@@ -61,24 +63,23 @@ function Day2(): JSX.Element {
             Part 1 Answer
           </Typography>
           <Typography sx={{ m: 1, color: "primary.main" }}>
+                {JSON.stringify(result.output1)}
           </Typography>
           <Typography variant="h4" sx={{ p: 1, color: "primary.main" }}>
             Part 2 Answer
           </Typography>
           <Typography sx={{ m: 1, color: "primary.main" }}>
+                {JSON.stringify(result.output2)}
           </Typography>
           <Typography variant="h4" sx={{ p: 1, color: "secondary.main" }}>
             input
           </Typography>
           <>
-            {result.input.map((input) => (
               <Typography
                 sx={{ ml: 1, color: "secondary.main" }}
-                key={JSON.stringify(input)}
               >
-                {JSON.stringify(input)}
+                {JSON.stringify(result.input)}
               </Typography>
-            ))}
           </>
         </Container>
       )}
