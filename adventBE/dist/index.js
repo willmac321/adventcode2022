@@ -1,12 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
+const application_1 = require("./application");
+const router_1 = require("./routes/router");
 const port = 4000;
-const app = (0, express_1.default)();
-app.get('/hey', (req, res) => res.send('hey'));
-app.listen(port, () => {
-    console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
-});
+const app = new application_1.App(port, [router_1.routes]);
+app.listen();

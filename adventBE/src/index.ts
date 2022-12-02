@@ -1,10 +1,11 @@
-import express from 'express';
+import {App} from './application';
+import {routes} from './routes/router';
+
 const port = 4000;
-const app = express();
 
-app.get('/hey', (req, res) => res.send('hey'));
+const app = new App(
+port, [routes]);
 
-app.listen(port, () => {
-    console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
-});
+app.listen();
+
 
