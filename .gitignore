@@ -24,3 +24,7 @@ yarn-error.log*
 
 **.so
 **.orig
+.env
+**.env
+**/*.env
+**/.env

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { CircularProgress, Paper } from "@mui/material";
+import { CircularProgress, Paper, Container, Typography } from "@mui/material";
 
 type errorType = {
   message: string;
 } | null;
 
 type resultType = {
-  hey: string;
+  output2: string;
+  output1: string;
+  input: string[][];
 } | null;
 
 function Day1(): JSX.Element {
@@ -36,11 +38,13 @@ function Day1(): JSX.Element {
     return <div>Error: {error.message}</div>;
   }
 
+  console.log(result);
   return (
     <Paper
       sx={{
         py: 3,
         px: 3,
+        alignItems: "center",
         border: 0,
         borderRadius: 0,
         display: "flex",
@@ -48,7 +52,40 @@ function Day1(): JSX.Element {
         flexDirection: "column",
       }}
     >
-      {!isLoaded || result === null ?  <CircularProgress sx={{ height: 1, margin: "auto" }} /> : result.hey}
+      <Typography variant="h3" sx={{ color: "primary.main" }}>
+        🎄🎄🎄🎄 Advent of Code 2022 Day 1🎄🎄🎄🎄
+      </Typography>
+      {!isLoaded || result === null ? (
+        <CircularProgress sx={{ height: 1, margin: "auto" }} />
+      ) : (
+        <Container>
+          <Typography variant="h4" sx={{ p: 1, color: "primary.main" }}>
+            Part 1 Answer
+          </Typography>
+          <Typography sx={{ m: 1, color: "primary.main" }}>
+            {result.output1}
+          </Typography>
+          <Typography variant="h4" sx={{ p: 1, color: "primary.main" }}>
+            Part 2 Answer
+          </Typography>
+          <Typography sx={{ m: 1, color: "primary.main" }}>
+            {result.output2}
+          </Typography>
+          <Typography variant="h4" sx={{ p: 1, color: "secondary.main" }}>
+            input
+          </Typography>
+          <>
+            {result.input.map((input) => (
+              <Typography
+                sx={{ ml: 1, color: "secondary.main" }}
+                key={JSON.stringify(input)}
+              >
+                {JSON.stringify(input)}
+              </Typography>
+            ))}
+          </>
+        </Container>
+      )}
     </Paper>
   );
 }
