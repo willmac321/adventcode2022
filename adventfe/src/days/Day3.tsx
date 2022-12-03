@@ -17,21 +17,17 @@ function Day3(): JSX.Element {
   const [error, setError] = useState<errorType>(null);
 
   useEffect(() => {
-    fetch("/api/day1")
+    fetch("/api/day3")
       .then(async (res) => await res.json())
       .then(
         (result) => {
           setIsLoaded(true);
-          const inp = result.input
-            .map((input: string[]) => {
-              return JSON.stringify(input);
-            })
-            .join("\n");
+          const inp = result.input.join("\n");
 
           setResult({
             input: inp,
             output1: result.output1,
-            output2: result.output2,
+            output2: result.output2 === undefined ? "" : result.output2,
           });
         },
         // Note: it's important to handle errors here
