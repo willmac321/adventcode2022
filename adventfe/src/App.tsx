@@ -1,5 +1,6 @@
 import { Paper, Stack, Typography } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
+import routes from "./routes";
 
 function App(): JSX.Element {
   return (
@@ -24,24 +25,23 @@ function App(): JSX.Element {
         <Typography variant="h2" sx={{ color: "primary.main" }}>
           🎄🎄🎄🎄 Advent of Code 2022 🎄🎄🎄🎄
         </Typography>
-        <RouterLink to="/day1">
-          <Typography
-            variant="h4"
-            component="span"
-            sx={{ color: "secondary.main" }}
-          >
-            day 1
-          </Typography>
-        </RouterLink>
-        <RouterLink to="/day2">
-          <Typography
-            variant="h4"
-            component="span"
-            sx={{ color: "secondary.main" }}
-          >
-            day 2
-          </Typography>
-        </RouterLink>
+        {routes.map((route, i) => {
+          if (i === 0 || route.path === undefined) return <></>;
+          return (
+            <RouterLink key={route.path} to={route.path}>
+              <Typography
+                variant="h4"
+                component="span"
+                sx={{ color: "secondary.main" }}
+              >
+                {`${route.path.charAt(0).toUpperCase()}${route.path.slice(
+                  1,
+                  3
+                )} ${route.path.slice(3)}`}
+              </Typography>
+            </RouterLink>
+          );
+        })}
       </Stack>
     </Paper>
   );
