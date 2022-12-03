@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { CircularProgress, Paper, Container, Typography } from "@mui/material";
+import DayTemplate from "../DayTemplate";
 
 type errorType = {
   message: string;
 } | null;
 
 type resultType = {
-  input: string[];
+  input: string;
   output1: string;
   output2: string;
 } | null;
@@ -22,7 +22,17 @@ function Day2(): JSX.Element {
       .then(
         (result) => {
           setIsLoaded(true);
-          setResult(result);
+          const inp = result.input
+            .map((input: string[]) => {
+              return JSON.stringify(input);
+            })
+            .join("\n\r");
+
+          setResult({
+            input: inp,
+            output1: result.output1,
+            output2: result.output2,
+          });
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -38,53 +48,7 @@ function Day2(): JSX.Element {
     return <div>Error: {error.message}</div>;
   }
 
-  console.log(result);
-  return (
-    <Paper
-      sx={{
-        py: 3,
-        px: 3,
-        alignItems: "center",
-        border: 0,
-        borderRadius: 0,
-        display: "flex",
-        minHeight: "100vh",
-        flexDirection: "column",
-      }}
-    >
-      <Typography variant="h3" sx={{ color: "primary.main" }}>
-        🎄🎄🎄🎄 Advent of Code 2022 Day 2 🎄🎄🎄🎄
-      </Typography>
-      {!isLoaded || result === null ? (
-        <CircularProgress sx={{ height: 1, margin: "auto" }} />
-      ) : (
-        <Container>
-          <Typography variant="h4" sx={{ p: 1, color: "primary.main" }}>
-            Part 1 Answer
-          </Typography>
-          <Typography sx={{ m: 1, color: "primary.main" }}>
-                {JSON.stringify(result.output1)}
-          </Typography>
-          <Typography variant="h4" sx={{ p: 1, color: "primary.main" }}>
-            Part 2 Answer
-          </Typography>
-          <Typography sx={{ m: 1, color: "primary.main" }}>
-                {JSON.stringify(result.output2)}
-          </Typography>
-          <Typography variant="h4" sx={{ p: 1, color: "secondary.main" }}>
-            input
-          </Typography>
-          <>
-              <Typography
-                sx={{ ml: 1, color: "secondary.main" }}
-              >
-                {JSON.stringify(result.input)}
-              </Typography>
-          </>
-        </Container>
-      )}
-    </Paper>
-  );
+  return <DayTemplate isLoaded={isLoaded} error={error} result={result} />;
 }
 
 export default Day2;
