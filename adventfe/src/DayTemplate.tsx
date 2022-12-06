@@ -4,7 +4,9 @@ function DayTemplate({
   isLoaded,
   error,
   result,
+  title ="Day 1",
 }: {
+  title?: string,
   isLoaded: boolean;
   error: { message: string } | null;
   result: { input: string; output1: string; output2: string } | null;
@@ -27,7 +29,7 @@ function DayTemplate({
       }}
     >
       <Typography variant="h3" sx={{ color: "primary.main" }}>
-        🎄🎄🎄🎄 Advent of Code 2022 Day 1🎄🎄🎄🎄
+        {`🎄🎄🎄🎄 Advent of Code 2022 ${title}🎄🎄🎄🎄`}
       </Typography>
       {!isLoaded || result === null ? (
         <CircularProgress sx={{ height: 1, margin: "auto" }} />
