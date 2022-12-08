@@ -10,11 +10,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func getInput(day int) string {
+func getInput(day string) string {
 	godotenv.Load()
 	value := os.Getenv("SESSION_COOKIE")
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://adventofcode.com/2022/day/7/input", nil)
+	req, err := http.NewRequest("GET", "https://adventofcode.com/2022/day/"+day+"/input", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -35,6 +35,6 @@ func getInput(day int) string {
 }
 
 func main() {
-	input := getInput(7)
-	days.Day7(input)
+	input := getInput("8")
+	days.Day8(input)
 }
