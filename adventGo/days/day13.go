@@ -29,6 +29,30 @@ func isRightBrack(st string) bool {
 	return bracketR.MatchString(st)
 }
 
+func isFirstItemLeftBrack(st string) bool {
+	bracketL, _ := regexp.Compile(`^\[`)
+	return bracketL.MatchString(st)
+}
+
+func splitOnBrack(str string) (string, string) {
+	curr := ""
+	if isFirstItemLeftBrack(str) {
+		str = str[1:]
+		rightB := findClose(str)
+		// split and get our current compare and the remainder that we'll look at later
+		curr = str[:rightB]
+		str = str[rightB+1:]
+		// if left begins with a comma, drop that because we already split
+	}
+	if str != "" && string(str[0]) == "," {
+		str = str[1:]
+	}
+	if curr != "" && string(curr[0]) == "," {
+		curr = curr[1:]
+	}
+	return curr, str
+}
+
 func findClose(st string) int {
 	// find closing bracket index
 	brackC := 1
@@ -53,6 +77,8 @@ func compare(input []string) int {
 	if len(right) < 1 && len(left) < 1 {
 		return 0
 	}
+
+	log.Printf("compare: %v vs %v", left, right)
 
 	// if empty right abort & fail
 	if len(right) < 1 {
@@ -85,13 +111,12 @@ func compare(input []string) int {
 		itemR = right[1:]
 	}
 
-	if itemR != "" && string(itemR[0])==","{
-		itemR=itemR[1:]
+	if itemR != "" && string(itemR[0]) == "," {
+		itemR = itemR[1:]
 	}
-	if itemL != "" && string(itemL[0])==","{
-		itemL=itemL[1:]
+	if itemL != "" && string(itemL[0]) == "," {
+		itemL = itemL[1:]
 	}
-
 
 	if isLeftBrack(itemL) {
 		itemL = itemL[1:] + "," + left
@@ -99,7 +124,7 @@ func compare(input []string) int {
 		// find closing bracket index
 		endB = findClose(itemL)
 		// grab that subst
-		log.Printf("input %v, itemL: %v, leftVal: %v, leftStr: %v, left: %v, endB: %v", input[0], itemL, leftVal, leftStr, left, endB)
+		// log.Printf("input %v, itemL: %v, leftVal: %v, leftStr: %v, left: %v, endB: %v", input[0], itemL, leftVal, leftStr, left, endB)
 		leftStr = itemL[:endB]
 		left = itemL[endB+1:]
 	}
@@ -116,6 +141,8 @@ func compare(input []string) int {
 
 	// if both are intscompare and go next
 	if leftVal != -1 && rightVal != -1 {
+	log.Printf("compare: %v vs %v", leftVal, rightVal)
+
 		if leftVal < rightVal {
 			// pass if left is smaller
 			return 1
@@ -132,36 +159,40 @@ func compare(input []string) int {
 
 	// if both are lists
 	if rightVal == -1 && leftVal == -1 {
-		rem, sub := compare([]string{left, right}), compare([]string{leftStr, rightStr})
-		if sub == -1 || rem == -1 {
+	log.Printf("compare: %v vs %v", left, right)
+		sub := compare([]string{left, right})
+		if sub == -1 {
 			return -1
-		} else if sub == 1 || rem == 1 {
+		} else if sub == 1 {
 			return 1
 		} else {
-			return 0
+	log.Printf("compare: %v vs %v", leftStr, rightStr)
+			return compare([]string{leftStr, rightStr})
 		}
 	}
 
 	// test to see if one is int and one is list, if so convert to int and go
-	if (rightVal == -1 || leftVal == -1) && (rightVal != -1 || leftVal == -1) {
+	if (rightVal == -1 || leftVal == -1) && (rightStr != "" || leftStr != "") {
 		if rightVal == -1 {
 			sub := compare([]string{"[" + strconv.FormatInt(leftVal, 10) + "]", rightStr})
-			if rem := compare([]string{left, right}); sub == -1 || rem == -1 {
+			if sub == -1 {
 				return -1
-			} else if sub == 1 || rem == 1 {
+			} else if sub == 1 {
 				return 1
 			} else {
-				return 0
+				return compare([]string{left, right})
 			}
 		}
 		if leftVal == -1 {
-			sub := compare([]string{leftStr, "[" + strconv.FormatInt(leftVal, 10) + "]"})
-			if rem := compare([]string{left, right}); sub == -1 || rem == -1 {
+	log.Printf("in the wonky func compare: %v vs %v \t left %v   right %v", leftStr, rightVal, left, right)
+	return 1
+			sub := compare([]string{leftStr, "[" + strconv.FormatInt(rightVal, 10) + "]"})
+			if sub == -1 {
 				return -1
-			} else if sub == 1 || rem == 1 {
+			} else if sub == 1 {
 				return 1
 			} else {
-				return 0
+				return compare([]string{left, right})
 			}
 		}
 	}
@@ -205,6 +236,7 @@ func Day13(sb string) {
 		if out > 0 {
 			output += i + 1
 		}
+		break
 	}
 	log.Printf("out ====> %v", output)
 }
