@@ -35,6 +35,6 @@ func getInput(day string) string {
 }
 
 func main() {
-	input := getInput("13")
-	days.Day13(input)
+	input := getInput("14")
+	days.Day14(input)
 }
