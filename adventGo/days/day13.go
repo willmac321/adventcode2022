@@ -1,9 +1,12 @@
 package days
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
+	"reflect"
 	"regexp"
-	"strconv"
+	"sort"
 	"strings"
 )
 
@@ -72,132 +75,73 @@ func findClose(st string) int {
 	return closingI
 }
 
-func compare(input []string) int {
-	left, right := input[0], input[1]
-	if len(right) < 1 && len(left) < 1 {
-		return 0
+func createStack(input string) (p []interface{}) {
+	json.Unmarshal([]byte(input), &p)
+	return
+}
+
+func compare(left []interface{}, right []interface{}) int {
+	for i, itemLeft := range left {
+		if len(right) <= i {
+			return -1
+		}
+		itemRight := right[i]
+		vL := reflect.ValueOf(itemLeft)
+		vR := reflect.ValueOf(itemRight)
+
+		if vL.Kind() == reflect.Float64 && vR.Kind() == reflect.Float64 {
+			if vL.Float() < vR.Float() {
+				return 1
+			}
+			if vL.Float() > vR.Float() {
+				return -1
+			}
+		}
+
+		if vL.Kind() == reflect.Float64 {
+			tempL := make([]interface{}, 1)
+			tempL[0] = vL.Float()
+			if tempR, isOk := itemRight.([]interface{}); isOk {
+				if temp := compare(tempL, tempR); temp != 0 {
+					return temp
+				}
+			}
+		}
+		if vR.Kind() == reflect.Float64 {
+			tempR := make([]interface{}, 1)
+			tempR[0] = vR.Float()
+			if tempL, isOk := itemLeft.([]interface{}); isOk {
+				if temp := compare(tempL, tempR); temp != 0 {
+					return temp
+				}
+			}
+		}
+		tempL, isOkL := itemLeft.([]interface{})
+		tempR, isOkR := itemRight.([]interface{})
+		if temp := compare(tempL, tempR); isOkL && isOkR && temp != 0 {
+			return temp
+		}
+
 	}
 
-	log.Printf("compare: %v vs %v", left, right)
-
-	// if empty right abort & fail
-	if len(right) < 1 {
-		return -1
-	}
-	if len(left) < 1 {
+	if len(left) < len(right) {
 		return 1
 	}
+	return 0
+}
 
-	var leftVal int64
-	var rightVal int64
-	leftVal, rightVal = -1, -1
+type byLength []string
 
-	leftStr, rightStr := "", ""
-	// shift left and right
-	itemL, left, _ := strings.Cut(left, ",")
-	itemR, right, _ := strings.Cut(right, ",")
+func (s byLength) Len() int {
+	return len(s)
+}
 
-	// if the item is only a number, getnumber
-	if isNumber(itemL) {
-		leftVal, _ = strconv.ParseInt(itemL, 0, 0)
-	}
-	if isNumber(itemR) {
-		rightVal, _ = strconv.ParseInt(itemR, 0, 0)
-	}
-	if itemL == "" && isLeftBrack(left) {
-		itemL = left[1:]
-	}
-	if itemR == "" && isLeftBrack(right) {
-		itemR = right[1:]
-	}
+func (s byLength) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
 
-	if itemR != "" && string(itemR[0]) == "," {
-		itemR = itemR[1:]
-	}
-	if itemL != "" && string(itemL[0]) == "," {
-		itemL = itemL[1:]
-	}
-
-	if isLeftBrack(itemL) {
-		itemL = itemL[1:] + "," + left
-		endB := -99
-		// find closing bracket index
-		endB = findClose(itemL)
-		// grab that subst
-		// log.Printf("input %v, itemL: %v, leftVal: %v, leftStr: %v, left: %v, endB: %v", input[0], itemL, leftVal, leftStr, left, endB)
-		leftStr = itemL[:endB]
-		left = itemL[endB+1:]
-	}
-
-	if isLeftBrack(itemR) {
-		itemR = itemR[1:] + "," + right
-		endB := -99
-		// find closing bracket index
-		endB = findClose(itemR)
-		// grab that subst
-		rightStr = itemR[:endB]
-		right = itemR[endB+1:]
-	}
-
-	// if both are intscompare and go next
-	if leftVal != -1 && rightVal != -1 {
-	log.Printf("compare: %v vs %v", leftVal, rightVal)
-
-		if leftVal < rightVal {
-			// pass if left is smaller
-			return 1
-		}
-		if leftVal > rightVal {
-			// fail if left is greater
-			return -1
-		}
-		if leftVal == rightVal {
-			// equal, keep going down the rabbit hole
-			return compare([]string{left, right})
-		}
-	}
-
-	// if both are lists
-	if rightVal == -1 && leftVal == -1 {
-	log.Printf("compare: %v vs %v", left, right)
-		sub := compare([]string{left, right})
-		if sub == -1 {
-			return -1
-		} else if sub == 1 {
-			return 1
-		} else {
-	log.Printf("compare: %v vs %v", leftStr, rightStr)
-			return compare([]string{leftStr, rightStr})
-		}
-	}
-
-	// test to see if one is int and one is list, if so convert to int and go
-	if (rightVal == -1 || leftVal == -1) && (rightStr != "" || leftStr != "") {
-		if rightVal == -1 {
-			sub := compare([]string{"[" + strconv.FormatInt(leftVal, 10) + "]", rightStr})
-			if sub == -1 {
-				return -1
-			} else if sub == 1 {
-				return 1
-			} else {
-				return compare([]string{left, right})
-			}
-		}
-		if leftVal == -1 {
-	log.Printf("in the wonky func compare: %v vs %v \t left %v   right %v", leftStr, rightVal, left, right)
-	return 1
-			sub := compare([]string{leftStr, "[" + strconv.FormatInt(rightVal, 10) + "]"})
-			if sub == -1 {
-				return -1
-			} else if sub == 1 {
-				return 1
-			} else {
-				return compare([]string{left, right})
-			}
-		}
-	}
-	// if empty left and haven't return yet consider pass
-	return 1
+func (s byLength) Less(i, j int) bool {
+	return compare(createStack(s[i]), createStack(s[j])) == 1
 }
 
 func Day13(sb string) {
@@ -225,18 +169,38 @@ func Day13(sb string) {
 [1,[2,[3,[4,[5,6,7]]]],8,9]
 [1,[2,[3,[4,[5,6,0]]]],8,9]
 `
+	newVal := `[[2]]
+[[6]]
+`
 	tsb = tsb
+	// p 1
 	testcase := sb
 	inputs := strings.Split(testcase, "\n\n")
 	output := 0
 	for i, d := range inputs {
 		t := strings.Split(d, "\n")
-		out := compare(t)
+		left, right := createStack(t[0]), createStack(t[1])
+		out := compare(left, right)
 		log.Print(t, "====>", out)
 		if out > 0 {
 			output += i + 1
 		}
-		break
 	}
 	log.Printf("out ====> %v", output)
+	// p2
+	t := testcase + newVal
+	t = strings.ReplaceAll(t, "\n\n", "\n")
+	inputs = strings.Split(t, "\n")
+	sort.Sort(byLength(inputs))
+	output = 1
+	for _, d := range inputs {
+		fmt.Println(d)
+	}
+	for i, d := range inputs {
+		if d == "[[2]]" || d == "[[6]]" {
+			output *= i
+		}
+	}
+
+	log.Printf("out P2 ====> %v", output)
 }
