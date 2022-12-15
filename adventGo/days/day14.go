@@ -2,21 +2,36 @@ package days
 
 import (
 	"log"
+	"strconv"
+	"strings"
 )
 
 type Coord struct {
-	x int
-	y int
-	str "sand" | "rock" | "air"
+	x int64
+	y int64
 }
 
 type Cave struct {
 	cave map[Coord]string
-	minX int
-	maxX int
+	minX int64
+	maxX int64
 	// away from 0 so maxY is distance from origin down
-	minY int
-	maxY int
+	minY int64
+	maxY int64
+}
+
+func findMin[T int64 | int](a, b T) int64 {
+	if a < b {
+		return int64(a)
+	}
+	return int64(b)
+}
+
+func findMax[T int64 | int](a, b T) int64 {
+	if a > b {
+		return int64(a)
+	}
+	return int64(b)
 }
 
 func Day14(sb string) {
@@ -33,13 +48,41 @@ func Day14(sb string) {
 
 	// draw the cave
 	// fill map with blocks and empties can extrapolate drawing later if I need to
-	
-	for _,input:=range testcase {
 
+	cursor := Coord{x: 0, y: 0}
+	for _, row := range strings.Split(testcase, "\n") {
+		inputs := strings.Split(row, " -> ")
+		for j := 1; j < len(inputs); j++ {
+			// have range now
+			start := strings.Split(inputs[j-1], ",")
+			end := strings.Split(inputs[j], ",")
+			x0, _ := strconv.ParseInt(start[0], 10, 0)
+			y0, _ := strconv.ParseInt(start[1], 10, 0)
+			x1, _ := strconv.ParseInt(end[0], 10, 0)
+			y1, _ := strconv.ParseInt(end[1], 10, 0)
 
+			newCoords := make(map[Coord]string, 0)
+			var min, max int64
+			min, max = 0, 0
+			if x0-x1 != 0 {
+				min = findMin(x0, x1)
+				max = findMax(x0, x1)
+				for k := min; min <= max; k++ {
+					newCoords[Coord{x: k, y: y0}] = "x"
+				}
 
+			} else if y0-y1 != 0 {
+				min = findMin(y0, y1)
+				max = findMax(y0, y1)
+				for k := min; min <= max; k++ {
+					newCoords[Coord{x: y0, y: k}] = "x"
+				}
+			}
+
+			cave.cave[cursor] = "x"
+		}
+		log.Print(cave.cave)
 	}
-
 
 	// do while loop for tick
 
