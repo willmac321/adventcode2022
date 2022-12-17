@@ -3,10 +3,9 @@ package day16
 import (
 	"log"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
-
-	"golang.org/x/exp/maps"
 )
 
 type Node struct {
@@ -15,84 +14,79 @@ type Node struct {
 	isOpen   bool
 	children []string
 }
+type byFlow []Node
+
+func (s byFlow) Len() int {
+	return len(s)
+}
+
+func (s byFlow) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s byFlow) Less(i, j int) bool {
+	return s[j].isOpen && s[i].flow > s[j].flow
+}
 
 // for the starting node, add 1 minute traversal and 1 minute if opening valve
 // if flow is 0 dont spend the minute opening
 // mark the node as open
 // travel to it's children and follow same structure
 // exit when all children are with flow are open and when time is 30
-func traverseMinMax(graph map[string]Node, start string, oldpath []string, oldvisited []string, oldtime int, oldflow int) (time, flow int, path []string, visited []string) {
-	// if out of time bal
-	if oldtime >= 3 || len(oldpath) < 1 {
-		return oldtime, oldflow, oldpath, oldvisited
-	}
-
-	curr := graph[start]
+func traverseMinMax(graph map[string]Node, start string, oldvisited []string, oldtime int, oldflow int) (time, flow int, visited []string) {
+	cutoffTime := 30
 
 	time = oldtime
 	flow = oldflow
-	path = make([]string, 0)
-	visited = make([]string, 0)
+	visited = []string{}
 
-	for k := range oldpath {
-		visited = append(visited, oldvisited[k])
-	}
-	for k := range oldpath {
-		if oldpath[k] != start {
-			path = append(path, oldpath[k])
+	path := []string{start}
+
+	for len(path) > 0 && time <= cutoffTime {
+		log.Print(time)
+		v := path[len(path)-1]
+		curr := graph[v]
+		visited = append(visited, v)
+		log.Print(path)
+
+		if len(path) > 1 {
+			path = path[:len(path)-2]
 		} else {
-			visited = append(oldvisited, oldpath[k])
+			path = make([]string, 0)
 		}
-	}
-
-	// incrememnt travel time
-	time++
-
-	if time >= 30 {
-		return oldtime, flow, path, visited
-	}
-
-	if !curr.isOpen && curr.flow > 0 {
 		time++
-		flow += (30 - time) * curr.flow
-		if time >= 30 {
-			return oldtime, flow, path, visited
+		if !curr.isOpen && curr.flow > 0 {
+			time++
+			flow += (cutoffTime - time) * curr.flow
 		}
-	}
 
-	// always set to open so we dont open again
-	curr.isOpen = true
-	graph[start] = curr
-
-	var maxPath []string
-	maxTime := time
-	maxFlow := flow
-	maxChild := ""
-	maxVis := []string
-
-	for _, child := range curr.children {
-		if visited > 1 && child == visited[len(visited)-2] {
-			continue
+		childs := []Node{}
+		if !curr.isOpen {
+			curr.isOpen = true
+			for _, child := range curr.children {
+				if len(curr.children) > 1 && visited[len(visited)-1] == child {
+					continue
+				}
+				childs = append(childs, graph[child])
+			}
 		}
-		t, f, p, v := traverseMinMax(graph, child, path, time, flow, visited)
-		if f > maxFlow && t <= 30 {
-			maxChild = child
-			maxPath = p
-			maxFlow = f
-			maxTime = t
-			maxVis = v
+		if curr.isOpen && len(childs) < 1 {
+			for _, child := range curr.children {
+				if !graph[child].isOpen {
+					childs = append(childs, graph[child])
+				}
+			}
 		}
+		sort.Sort(byFlow(childs))
+
+		log.Print(childs)
+		for _, child := range childs {
+			path = append(path, child.name)
+		}
+
+
+		graph[v] = curr
 	}
-
-	log.Printf("%v %v %v %v %v", maxChild, maxFlow, maxTime, maxPath, maxVis)
-
-	if maxFlow > flow {
-		flow = maxFlow
-		path = maxPath
-		time = maxTime
-		visited = maxVis
-	}
-
 	return
 }
 
@@ -124,6 +118,5 @@ Valve JJ has flow rate=21; tunnel leads to valve II
 	}
 	log.Printf("%v", p1)
 
-	notVisited := maps.Keys(p1)
-	log.Println(traverseMinMax(p1, "AA", notVisited, 0, 0))
+	log.Println(traverseMinMax(p1, "AA", make([]string, 0), 0, 0))
 }
