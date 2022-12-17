@@ -93,7 +93,7 @@ func traverseMinMax(graph map[string]Node, start string, oldpath []string, oldti
 }
 
 func Day16(sb string) {
-	tsb := `Valve AA has flow rate=0; tunnels lead to valves DD
+	tsb := `Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
 Valve BB has flow rate=13; tunnels lead to valves CC, AA
 Valve CC has flow rate=2; tunnels lead to valves DD, BB
 Valve DD has flow rate=20; tunnels lead to valves CC, AA, EE
