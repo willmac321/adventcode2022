@@ -1,7 +1,7 @@
 package main
 
 import (
-	"adventGo/days/day15"
+	"adventGo/days/day16"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -35,6 +35,6 @@ func getInput(day string) string {
 }
 
 func main() {
-	input := getInput("15")
-	day15.Day15(input)
+	input := getInput("16")
+	day16.Day16(input)
 }

@@ -169,7 +169,7 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3
 	tsb = tsb
 	// p 1
 	testcase := sb
-	re := regexp.MustCompile(`-?[0-9]+`)
+  re := regexp.MustCompile(`-?[0-9]+`)
 
 	for i := 0; i < int(cutoffM)+1; i++ {
 		grid := make([]Exclude, 0)
