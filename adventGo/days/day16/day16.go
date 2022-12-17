@@ -21,20 +21,27 @@ type Node struct {
 // mark the node as open
 // travel to it's children and follow same structure
 // exit when all children are with flow are open and when time is 30
-func traverseMinMax(graph map[string]Node, start string, oldpath []string, oldtime int, oldflow int) (time, flow int, path []string) {
+func traverseMinMax(graph map[string]Node, start string, oldpath []string, oldvisited []string, oldtime int, oldflow int) (time, flow int, path []string, visited []string) {
 	// if out of time bal
 	if oldtime >= 3 || len(oldpath) < 1 {
-		return oldtime, oldflow, oldpath
+		return oldtime, oldflow, oldpath, oldvisited
 	}
 
 	curr := graph[start]
+
 	time = oldtime
 	flow = oldflow
 	path = make([]string, 0)
+	visited = make([]string, 0)
 
+	for k := range oldpath {
+		visited = append(visited, oldvisited[k])
+	}
 	for k := range oldpath {
 		if oldpath[k] != start {
 			path = append(path, oldpath[k])
+		} else {
+			visited = append(oldvisited, oldpath[k])
 		}
 	}
 
@@ -42,14 +49,14 @@ func traverseMinMax(graph map[string]Node, start string, oldpath []string, oldti
 	time++
 
 	if time >= 30 {
-		return oldtime, flow, path
+		return oldtime, flow, path, visited
 	}
 
 	if !curr.isOpen && curr.flow > 0 {
 		time++
 		flow += (30 - time) * curr.flow
 		if time >= 30 {
-			return oldtime, flow, path
+			return oldtime, flow, path, visited
 		}
 	}
 
@@ -61,32 +68,29 @@ func traverseMinMax(graph map[string]Node, start string, oldpath []string, oldti
 	maxTime := time
 	maxFlow := flow
 	maxChild := ""
+	maxVis := []string
 
 	for _, child := range curr.children {
-		t, f, p := traverseMinMax(graph, child, path, time, flow)
+		if visited > 1 && child == visited[len(visited)-2] {
+			continue
+		}
+		t, f, p, v := traverseMinMax(graph, child, path, time, flow, visited)
 		if f > maxFlow && t <= 30 {
 			maxChild = child
 			maxPath = p
 			maxFlow = f
 			maxTime = t
+			maxVis = v
 		}
 	}
 
-	log.Printf("%v %v %v %v", maxChild, maxFlow, maxTime, maxPath)
+	log.Printf("%v %v %v %v %v", maxChild, maxFlow, maxTime, maxPath, maxVis)
 
 	if maxFlow > flow {
 		flow = maxFlow
 		path = maxPath
 		time = maxTime
-	}
-
-	for _, child := range curr.children {
-		t, f, p := traverseMinMax(graph, child, path, time, flow)
-		if f > flow && t <= 30 {
-			path = p
-			flow = f
-			time = t
-		}
+		visited = maxVis
 	}
 
 	return
